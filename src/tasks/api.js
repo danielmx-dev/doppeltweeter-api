@@ -1,21 +1,25 @@
 const { taskFromPromise } = require('../helpers/webtask-helpers')
-const { getValue, setValue } = require('../lib/storage')
 const Twitter = require('../lib/twitter')
 const assert = require('assert')
 
 module.exports = taskFromPromise(async ctx => {
-  assert(ctx.data.API_KEY, 'A valid bot token is required')
+  assert(ctx.secrets.API_KEY, 'A valid twitter API_KEY is required')
 
   const twitterClient = Twitter.createClient({
-    apiKey: ctx.data.API_KEY,
+    apiKey: ctx.secrets.API_KEY,
   })
 
-  const results = await twitterClient.search('something')
+  const users = [
+    ctx.query.user_1,
+    ctx.query.user_2,
+  ]
 
-  console.log(results)
+  const tweetsPerUser = await Promise.all(
+    users.map(getTweetsPerUser(twitterClient))
+  )
 
-  const currentCounter = await getValue(ctx, 'counter')
-  const counter = currentCounter ? currentCounter + 1 : 1
-  await setValue(ctx, 'counter', counter)
-  return { counter }
+  return { tweetsPerUser }
 })
+
+const getTweetsPerUser = twitterClient => async username =>
+  await twitterClient.search({ username })
