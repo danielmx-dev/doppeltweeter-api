@@ -6,9 +6,13 @@ const assert = require('assert')
 module.exports = taskFromPromise(async ctx => {
   assert(ctx.data.API_KEY, 'A valid bot token is required')
 
-  Twitter.setContext({
+  const twitterClient = Twitter.createClient({
     apiKey: ctx.data.API_KEY,
   })
+
+  const results = await twitterClient.search('something')
+
+  console.log(results)
 
   const currentCounter = await getValue(ctx, 'counter')
   const counter = currentCounter ? currentCounter + 1 : 1

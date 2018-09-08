@@ -1,32 +1,37 @@
-
 const axios = require('axios')
 
 const BASE_URL = 'https://api.twitter.com'
-let context = null
 
-/* Call the given endpoing in Slack API */
-const setContext = _context => {
-  context = _context
-}
-
-
-const twitterRequest = ({
-  path,
-  query,
-  data,
+const createClient = ({
+  apiKey,
 }) => {
-  return axios({
-    url: BASE_URL + path,
-    headers: {
-      Authorization: `Bearer ${context.apiKey}`,
-    },
+
+  const twitterRequest = ({
+    path,
     query,
     data,
-  })
+  }) => {
+    return axios({
+      url: BASE_URL + path,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+      query,
+      data,
+    })
+  }
+
+  const search = query => 
+    twitterRequest({
+      path:' /1.1/search/tweets.json',
+      query,
+    })
+
+  return {
+    search,
+  }
 }
 
-
 module.exports = {
-  setContext,
-  twitterRequest,
+  createClient,
 }
