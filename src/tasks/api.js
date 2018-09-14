@@ -1,13 +1,14 @@
 const { taskFromPromise } = require('../helpers/webtask-helpers')
 const Twitter = require('../lib/twitter')
+const { getConfigFromContext } = require('../lib/webtask-twitter')
 const assert = require('assert')
 
 module.exports = taskFromPromise(async ctx => {
-  assert(ctx.secrets.API_KEY, 'A valid twitter API_KEY is required')
+  assert(ctx.query.user_1, 'User 1 is required')
+  assert(ctx.query.user_2, 'User 2 is required')
 
-  const twitterClient = Twitter.createClient({
-    apiKey: ctx.secrets.API_KEY,
-  })
+  const twitterClientConfig = getConfigFromContext(ctx)
+  const twitterClient = Twitter.createClient(twitterClientConfig)
 
   const users = [
     ctx.query.user_1,
@@ -22,4 +23,4 @@ module.exports = taskFromPromise(async ctx => {
 })
 
 const getTweetsPerUser = twitterClient => async username =>
-  await twitterClient.search({ username })
+  await twitterClient.getUserTimeline(username)
